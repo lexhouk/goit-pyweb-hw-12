@@ -4,10 +4,14 @@ from sqlalchemy.sql import text
 from uvicorn import run
 
 from src.database import get_db
-from src.routes import router
+from src.routes.auth import router as auth_router
+from src.routes.contacts import router as contacts_router
 
 
-(app := FastAPI()).include_router(router, prefix='/api')
+app = FastAPI()
+
+app.include_router(auth_router, prefix='/api')
+app.include_router(contacts_router, prefix='/api')
 
 
 @app.get('/api/healthchecker', tags=['Status'])

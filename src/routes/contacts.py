@@ -1,14 +1,9 @@
 from fastapi import APIRouter, Depends, Path, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from .create import action as create
-from .delete import action as delete
-from .helper import get
-from .birthday import action as birthday
-from .read import action as read
-from .update import action as update
 from src.database import get_db
-from src.schemas import Request, Response, Responses
+from src.repository.contacts import birthday, create, delete, get, read, update
+from src.schemas.contact import Request, Response, Responses
 
 
 router = APIRouter(prefix='/contacts', tags=['Contacts'])

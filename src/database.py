@@ -68,7 +68,7 @@ class Base(DeclarativeBase):
     ...
 
 
-class Entity(Base):
+class Contact(Base):
     __tablename__ = 'contacts'
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -84,6 +84,21 @@ class Entity(Base):
     phone_number: Mapped[str] = mapped_column(String(20), nullable=True)
     birthday: Mapped[str] = mapped_column(Date(), nullable=True)
     bio: Mapped[str] = mapped_column(String(400), nullable=True)
+
+
+class User(Base):
+    __tablename__ = 'users'
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+
+    email: Mapped[str] = mapped_column(
+        String(150),
+        nullable=False,
+        unique=True,
+    )
+
+    password: Mapped[str] = mapped_column(String(255), nullable=False)
+    token: Mapped[str] = mapped_column(String(255), nullable=True)
 
 
 async def init_db():

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "Contacts API"
-version = "0.1.0"
+version = "0.2.0"
 description = "Based on FastAPI."
 authors = ["Oleksandr Horbatiuk <oleksandr.v.horbatiuk@gmail.com>"]
 readme = "README.md"
@@ -15,6 +15,8 @@ sqlalchemy = "^2.0.32"
 asyncpg = "^0.29.0"
 aiofile = "^3.8.8"
 alembic = "^1.13.2"
+passlib = {extras = ["bcrypt"], version = "^1.7.4"}
+python-jose = {extras = ["cryptography"], version = "^3.3.0"}
 
 
 [build-system]
