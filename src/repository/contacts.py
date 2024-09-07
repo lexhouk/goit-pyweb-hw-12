@@ -1,15 +1,16 @@
 from datetime import date
 
 from fastapi import HTTPException, status
+from sqlalchemy import and_
 from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.database import Contact
+from src.database import Contact, User
 from src.schemas.contact import Request, Response, Responses
 
 
-async def create(db: AsyncSession, body: Request) -> Response:
-    contact = Contact(**body.model_dump(exclude_unset=True))
+async def create(db: AsyncSession, user: User, body: Request) -> Response:
+    contact = Contact(**body.model_dump(exclude_unset=True), user=user)
 
     db.add(contact)
 
@@ -21,11 +22,12 @@ async def create(db: AsyncSession, body: Request) -> Response:
 
 async def read(
     db: AsyncSession,
+    user: User,
     first_name: str = None,
     last_name: str = None,
     email: str = None
 ) -> list[Response]:
-    query = select(Contact)
+    query = select(Contact).where(Contact.user == user)
 
     if first_name:
         query.where(Contact.first_name == first_name)
@@ -44,8 +46,12 @@ async def read(
     return result
 
 
-async def birthday(db: AsyncSession, days: int) -> Responses:
-    query = select(Contact).where(Contact.birthday.isnot(None))
+async def birthday(db: AsyncSession, user: User, days: int) -> Responses:
+    query = select(Contact).where(and_(
+        Contact.birthday.isnot(None),
+        Contact.user == user,
+    ))
+
     result = await db.execute(query)
 
     if not (entities := result.scalars().all()):
@@ -66,8 +72,8 @@ async def birthday(db: AsyncSession, days: int) -> Responses:
     return result
 
 
-async def get(db: AsyncSession, contact_id: int) -> Response:
-    query = select(Contact).filter_by(id=contact_id)
+async def get(db: AsyncSession, user: User, contact_id: int) -> Response:
+    query = select(Contact).filter_by(id=contact_id, user=user)
     result = await db.execute(query)
 
     if not (contact := result.scalar_one_or_none()):
@@ -78,10 +84,11 @@ async def get(db: AsyncSession, contact_id: int) -> Response:
 
 async def update(
     db: AsyncSession,
+    user: User,
     body: Request,
     contact_id: int
 ) -> Response:
-    if (contact := await get(db, contact_id)):
+    if (contact := await get(db, user, contact_id)):
         for key, value in body.model_dump(exclude_unset=True).items():
             setattr(contact, key, value)
 
@@ -91,7 +98,7 @@ async def update(
     return contact
 
 
-async def delete(db: AsyncSession, contact_id: int) -> None:
-    if (contact := await get(db, contact_id)):
+async def delete(db: AsyncSession, user: User, contact_id: int) -> None:
+    if (contact := await get(db, user, contact_id)):
         await db.delete(contact)
         await db.commit()

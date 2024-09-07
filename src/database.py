@@ -1,10 +1,10 @@
 from aiofile import async_open
 from fastapi import Depends, HTTPException, status
-from sqlalchemy import Date, String, text
+from sqlalchemy import Date, ForeignKey, Integer, String, text
 from sqlalchemy.exc import OperationalError, SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, \
     async_sessionmaker, create_async_engine
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 
 async def uri() -> str:
@@ -84,6 +84,18 @@ class Contact(Base):
     phone_number: Mapped[str] = mapped_column(String(20), nullable=True)
     birthday: Mapped[str] = mapped_column(Date(), nullable=True)
     bio: Mapped[str] = mapped_column(String(400), nullable=True)
+
+    user_id: Mapped[int] = mapped_column(
+        Integer,
+        ForeignKey('users.id'),
+        nullable=True,
+    )
+
+    user: Mapped['User'] = relationship(
+        'User',
+        backref='contacts',
+        lazy='joined',
+    )
 
 
 class User(Base):
