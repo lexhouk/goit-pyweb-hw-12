@@ -3,8 +3,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database import get_db, User
 from src.repository.contacts import birthday, create, delete, get, read, update
-from src.service import auth_service
 from src.schemas.contact import Request, Response, Responses
+from src.services.auth import auth_service
 
 
 router = APIRouter(prefix='/contacts', tags=['Contacts'])

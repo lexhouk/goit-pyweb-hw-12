@@ -8,24 +8,24 @@ from passlib.context import CryptContext
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from .database import get_db, User
-from .schemas.user import Response
+from src.database import get_db, User
+from src.schemas.user import Response
+from .secret import secret
 
 
 class Auth:
-    pwd_context = CryptContext(['bcrypt'], deprecated='auto')
-    SECRET_KEY = '974790aec4ac460bdc11645decad4dce7c139b7f2982b7428ec44e886ea5'
-    ALGORITHM = 'HS256'
+    __ALGORITHM = 'HS256'
+    __pwd_context = CryptContext(['bcrypt'], deprecated='auto')
 
     def verify_password(
         self,
         plain_password: str,
         hashed_password: str
     ) -> bool:
-        return self.pwd_context.verify(plain_password, hashed_password)
+        return self.__pwd_context.verify(plain_password, hashed_password)
 
     def get_password_hash(self, password: str) -> str:
-        return self.pwd_context.hash(password)
+        return self.__pwd_context.hash(password)
 
     oauth2_scheme = OAuth2PasswordBearer('api/auth/login')
 
@@ -46,14 +46,14 @@ class Auth:
         else:
             payload['exp'] += timedelta(minutes=15)
 
-        return jwt.encode(payload, self.SECRET_KEY, self.ALGORITHM)
+        return jwt.encode(payload, await secret(), self.__ALGORITHM)
 
     async def decode_refresh_token(self, refresh_token: str) -> str:
         try:
             payload = jwt.decode(
                 refresh_token,
-                self.SECRET_KEY,
-                algorithms=[self.ALGORITHM],
+                await secret(),
+                [self.__ALGORITHM],
             )
 
             if payload['scope'] == 'refresh_token':
@@ -91,8 +91,8 @@ class Auth:
         try:
             payload = jwt.decode(
                 token,
-                self.SECRET_KEY,
-                algorithms=[self.ALGORITHM],
+                await secret(),
+                [self.__ALGORITHM],
             )
 
             if payload['scope'] != 'access_token' or payload['sub'] is None:

@@ -2,8 +2,8 @@ from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database import get_db, User
-from src.service import auth_service
 from src.schemas.user import Request, Response, TokenSchema
+from src.services.auth import auth_service
 
 
 async def create(

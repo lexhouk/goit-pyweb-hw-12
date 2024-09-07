@@ -1,4 +1,3 @@
-from aiofile import async_open
 from fastapi import Depends, HTTPException, status
 from sqlalchemy import Date, ForeignKey, Integer, String, text
 from sqlalchemy.exc import OperationalError, SQLAlchemyError
@@ -6,10 +5,11 @@ from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, \
     async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
+from .services.secret import secret
+
 
 async def uri() -> str:
-    async with async_open('.secret', encoding='utf-8') as file:
-        password = await file.read()
+    password = await secret()
 
     return f'postgresql+asyncpg://postgres:{password}@localhost:5432/postgres'
 
