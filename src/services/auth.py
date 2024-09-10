@@ -10,12 +10,15 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database import get_db, User
 from src.schemas.user import Response
-from .secret import secret
+from .environment import environment
 
 
 class Auth:
     __ALGORITHM = 'HS256'
     __pwd_context = CryptContext(['bcrypt'], deprecated='auto')
+
+    def __init__(self) -> None:
+        self.__SECRET = environment('SECRET')
 
     def verify_password(
         self,
@@ -46,13 +49,13 @@ class Auth:
         else:
             payload['exp'] += timedelta(minutes=15)
 
-        return jwt.encode(payload, await secret(), self.__ALGORITHM)
+        return jwt.encode(payload, self.__SECRET, self.__ALGORITHM)
 
     async def decode_refresh_token(self, refresh_token: str) -> str:
         try:
             payload = jwt.decode(
                 refresh_token,
-                await secret(),
+                self.__SECRET,
                 [self.__ALGORITHM],
             )
 
@@ -91,7 +94,7 @@ class Auth:
         try:
             payload = jwt.decode(
                 token,
-                await secret(),
+                self.__SECRET,
                 [self.__ALGORITHM],
             )
 

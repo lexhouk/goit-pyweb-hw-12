@@ -5,13 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, \
     async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
-from .services.secret import secret
-
-
-async def uri() -> str:
-    password = await secret()
-
-    return f'postgresql+asyncpg://postgres:{password}@localhost:5432/postgres'
+from .services.environment import environment
 
 
 engine: AsyncEngine = None
@@ -21,7 +15,7 @@ async def init_engine() -> None:
     global engine
 
     try:
-        engine = create_async_engine(await uri())
+        engine = create_async_engine(environment())
 
         async with engine.connect() as conn:
             await conn.execute(text('SELECT 1'))

@@ -6,7 +6,8 @@ from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
-from src.database import Base, uri
+from src.database import Base
+from src.services.environment import environment
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -27,6 +28,7 @@ target_metadata = Base.metadata
 # can be acquired:
 # my_important_option = config.get_main_option("my_important_option")
 # ... etc.
+config.set_main_option('sqlalchemy.url', environment())
 
 
 def run_migrations_offline() -> None:
@@ -61,8 +63,6 @@ def run_migrations_online_launch(connection: Connection) -> None:
 
 
 async def run_migrations_online_loop() -> None:
-    config.set_main_option('sqlalchemy.url', await uri())
-
     connectable = async_engine_from_config(
         config.get_section(config.config_ini_section, {}),
         prefix="sqlalchemy.",

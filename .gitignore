@@ -1,4 +1,4 @@
-.secret
+.env
 .venv
 poetry.lock
 __pycache__
